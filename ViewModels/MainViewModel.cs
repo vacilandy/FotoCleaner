@@ -18,6 +18,10 @@ public sealed class MainViewModel : ObservableObject
     private readonly MediaScanner scanner = new(new PerceptualHashService(), new HashDatabase());
     private readonly FileRelocationService relocator = new();
     public ObservableCollection<DuplicateGroup> Groups { get; } = [];
+    public ObservableCollection<ImageFormatOption> ImageFormats { get; } = [
+        new("JPG"), new("JPEG"), new("PNG"), new("WEBP"), new("BMP"),
+        new("GIF"), new("TIFF"), new("HEIC"), new("AVIF"), new("RAW")
+    ];
     public string SelectedFolder { get => selectedFolder; set => SetProperty(ref selectedFolder, value); }
     public string StatusText { get => statusText; set => SetProperty(ref statusText, value); }
     public double Threshold { get => threshold; set => SetProperty(ref threshold, value); }
@@ -29,6 +33,8 @@ public sealed class MainViewModel : ObservableObject
     public AsyncRelayCommand MoveSelectedCommand { get; }
     public RelayCommand SelectLowQualityCommand { get; }
     public RelayCommand ClearSelectionCommand { get; }
+    public RelayCommand EnableAllFormatsCommand { get; }
+    public RelayCommand DisableAllFormatsCommand { get; }
     public MainViewModel()
     {
         SelectFolderCommand = new(SelectFolder);
@@ -36,6 +42,8 @@ public sealed class MainViewModel : ObservableObject
         MoveSelectedCommand = new(MoveSelectedAsync, () => !busy);
         SelectLowQualityCommand = new(SelectLowQuality);
         ClearSelectionCommand = new(ClearSelection);
+        EnableAllFormatsCommand = new(() => SetAllFormats(true));
+        DisableAllFormatsCommand = new(() => SetAllFormats(false));
     }
     private void SelectFolder()
     {
@@ -56,7 +64,8 @@ public sealed class MainViewModel : ObservableObject
         busy = true; OnStateChanged(); Groups.Clear(); StatusText = "Preparando análisis...";
         try
         {
-            var files = await scanner.ScanAsync(SelectedFolder, new Progress<string>(s => StatusText = s), CancellationToken.None);
+            var selectedExtensions = ImageFormats.Where(format => format.IsEnabled).Select(format => $".{format.Extension.ToLowerInvariant()}");
+            var files = await scanner.ScanAsync(SelectedFolder, selectedExtensions, new Progress<string>(s => StatusText = s), CancellationToken.None);
             var processed = new HashSet<string>();
             foreach (var file in files)
             {
@@ -107,6 +116,11 @@ public sealed class MainViewModel : ObservableObject
     {
         foreach (var item in Groups.SelectMany(group => group.Items)) item.IsSelected = false;
         StatusText = "Se desmarcaron todas las fotos";
+    }
+    private void SetAllFormats(bool enabled)
+    {
+        foreach (var format in ImageFormats) format.IsEnabled = enabled;
+        StatusText = enabled ? "Seleccionados todos los formatos" : "Deseleccionados todos los formatos";
     }
     private void OnStateChanged() 
     { 

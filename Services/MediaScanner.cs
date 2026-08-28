@@ -6,14 +6,15 @@ namespace FotoCleaner.Services;
 
 public sealed class MediaScanner(IHashService hasher, HashDatabase database)
 {
-    public async Task<IReadOnlyList<MediaFile>> ScanAsync(string root, IProgress<string>? progress, CancellationToken token)
+    public async Task<IReadOnlyList<MediaFile>> ScanAsync(string root, IEnumerable<string> selectedExtensions, IProgress<string>? progress, CancellationToken token)
     {
         var fullRoot = Path.GetFullPath(root);
         if (!Directory.Exists(fullRoot)) throw new DirectoryNotFoundException(fullRoot);
         var duplicateFolder = Path.Combine(fullRoot, "Duplicadas") + Path.DirectorySeparatorChar;
+        var extensions = selectedExtensions.ToHashSet(StringComparer.OrdinalIgnoreCase);
         var paths = Directory.EnumerateFiles(fullRoot, "*.*", SearchOption.AllDirectories)
             .Where(path => !Path.GetFullPath(path).StartsWith(duplicateFolder, StringComparison.OrdinalIgnoreCase))
-            .Where(PerceptualHashService.IsSupported).ToArray();
+            .Where(path => extensions.Contains(Path.GetExtension(path))).ToArray();
         var results = new ConcurrentBag<MediaFile>();
         var completed = 0;
         var options = new ParallelOptions
