@@ -28,12 +28,14 @@ public sealed class MainViewModel : ObservableObject
     public AsyncRelayCommand ScanCommand { get; }
     public AsyncRelayCommand MoveSelectedCommand { get; }
     public RelayCommand SelectLowQualityCommand { get; }
+    public RelayCommand ClearSelectionCommand { get; }
     public MainViewModel()
     {
         SelectFolderCommand = new(SelectFolder);
         ScanCommand = new(ScanAsync, () => CanScan);
         MoveSelectedCommand = new(MoveSelectedAsync, () => !busy);
         SelectLowQualityCommand = new(SelectLowQuality);
+        ClearSelectionCommand = new(ClearSelection);
     }
     private void SelectFolder()
     {
@@ -100,6 +102,11 @@ public sealed class MainViewModel : ObservableObject
             if (smallest is not null) smallest.IsSelected = true;
         }
         StatusText = "Seleccionada la foto más pequeña de cada grupo";
+    }
+    private void ClearSelection()
+    {
+        foreach (var item in Groups.SelectMany(group => group.Items)) item.IsSelected = false;
+        StatusText = "Se desmarcaron todas las fotos";
     }
     private void OnStateChanged() 
     { 
