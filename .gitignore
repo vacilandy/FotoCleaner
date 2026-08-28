@@ -8,6 +8,7 @@ publish-v5/
 publish-optimized/
 publish-final/
 publish-final-v2/
+publish-final-v3/
 *.user
 *.suo
 FotoCleaner-para-Gemini.zip
