@@ -10,9 +10,10 @@ public sealed class SelectableMediaFile : ObservableObject
     public bool IsSelected { get => isSelected; set => SetProperty(ref isSelected, value); }
     public int Rotation { get => rotation; private set => SetProperty(ref rotation, value); }
     public RelayCommand RotateCommand { get; }
+    public RelayCommand SelectCommand { get; }
     public string FileName => File.FileName;
     public string FullPath => File.FullPath;
     public string Details => File.Details;
-    public SelectableMediaFile() { RotateCommand = new(Rotate); }
+    public SelectableMediaFile() { RotateCommand = new(Rotate); SelectCommand = new(() => IsSelected = true); }
     private void Rotate() => Rotation = (Rotation + 90) % 360;
 }
