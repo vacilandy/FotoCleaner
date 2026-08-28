@@ -12,7 +12,7 @@ public sealed class MainViewModel : ObservableObject
 {
     private string selectedFolder = "Ninguna carpeta seleccionada";
     private string statusText = "Listo para analizar";
-    private double threshold = 92;
+    private double threshold = 90;
     private double previewSize = 180;
     private bool busy;
     private readonly MediaScanner scanner = new(new PerceptualHashService(), new HashDatabase());
