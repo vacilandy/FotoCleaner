@@ -13,6 +13,12 @@ public sealed class SelectableMediaFile : ObservableObject
     public string FileName => File.FileName;
     public string FullPath => File.FullPath;
     public string Details => File.Details;
+    public string Resolution => File.Resolution;
+    public string Location => File.Location;
+    public string Format => File.Format;
+    public string Weight => File.Weight;
+    public int QualityScore => File.QualityScore;
+    public string QualityLabel => $"Calidad estimada: {QualityScore}/100";
     public SelectableMediaFile() { RotateCommand = new(Rotate); }
     private void Rotate() => Rotation = (Rotation + 90) % 360;
 }

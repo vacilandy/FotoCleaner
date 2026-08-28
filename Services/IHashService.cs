@@ -1,6 +1,6 @@
 namespace FotoCleaner.Services;
 
-public sealed record HashResult(ulong Hash, TimeSpan? Duration);
+public sealed record HashResult(ulong Hash, TimeSpan? Duration, int Width = 0, int Height = 0);
 
 public interface IHashService
 {

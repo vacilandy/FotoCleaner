@@ -26,7 +26,7 @@ public sealed class PerceptualHashService : IHashService
             var fileBytes = File.ReadAllBytes(path);
             using var source = Cv2.ImDecode(fileBytes, ImreadModes.Grayscale);
             if (source.Empty()) throw new InvalidDataException("No se pudo leer la imagen.");
-            return new HashResult(DHash(source), null);
+            return new HashResult(DHash(source), null, source.Width, source.Height);
         }
         catch (Exception ex)
         {
