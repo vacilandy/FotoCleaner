@@ -23,3 +23,10 @@ dotnet run
 Prueba manual: selecciona una carpeta con copias redimensionadas o con distinto formato, ajusta el umbral, analiza y selecciona archivos. El segundo analisis reutiliza la cache. Confirma que los seleccionados aparecen en `<carpeta>\\Duplicadas`.
 
 La aplicacion solo analiza la carpeta elegida y sus descendientes, normaliza rutas con `Path.GetFullPath` y valida que los movimientos permanezcan dentro de esa raiz.
+
+## Recomendaciones de rendimiento
+
+- La cache SQLite evita recalcular fotos que no cambiaron; el guardado de nuevos hashes se realiza en una transaccion por lote.
+- El escaneo usa concurrencia limitada para equilibrar CPU y velocidad del disco.
+- Las listas usan reciclado de filas y las miniaturas se decodifican reducidas para mantener fluido el desplazamiento.
+- Para bibliotecas muy grandes, analiza por subcarpetas y usa miniaturas de 120 a 180 px.

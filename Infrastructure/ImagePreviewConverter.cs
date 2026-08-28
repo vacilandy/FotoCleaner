@@ -16,7 +16,7 @@ public sealed class ImagePreviewConverter : IValueConverter
             var image = new BitmapImage();
             image.BeginInit();
             image.CacheOption = BitmapCacheOption.OnLoad;
-            image.DecodePixelWidth = 152;
+            image.DecodePixelWidth = 220;
             image.StreamSource = stream;
             image.EndInit();
             image.Freeze();
