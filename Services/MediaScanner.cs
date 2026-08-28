@@ -22,6 +22,7 @@ public sealed class MediaScanner(IHashService hasher, HashDatabase database)
             MaxDegreeOfParallelism = Math.Min(4, Math.Max(1, Environment.ProcessorCount / 2)),
             CancellationToken = token
         };
+        var pendingCache = new ConcurrentBag<(string Path, FileInfo Info, HashResult Result)>();
         await Parallel.ForEachAsync(paths, options, async (path, ct) =>
         {
             try
@@ -30,7 +31,7 @@ public sealed class MediaScanner(IHashService hasher, HashDatabase database)
                 var info = new FileInfo(path);
                 var cached = await database.FindAsync(path, info, ct);
                 var hash = cached ?? await hasher.ComputeAsync(path, ct);
-                if (cached is null) await database.SaveAsync(path, info, hash, ct);
+                if (cached is null) pendingCache.Add((path, info, hash));
                 results.Add(new MediaFile(path, info.Name, info.Length, hash.Duration, hash.Hash));
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException)
@@ -43,6 +44,11 @@ public sealed class MediaScanner(IHashService hasher, HashDatabase database)
                 progress?.Report($"Analizados {finished} de {paths.Length}");
             }
         });
+        if (!pendingCache.IsEmpty)
+        {
+            progress?.Report($"Guardando {pendingCache.Count} hashes en caché...");
+            await database.SaveManyAsync(pendingCache, token);
+        }
         return results.ToArray();
     }
 }
