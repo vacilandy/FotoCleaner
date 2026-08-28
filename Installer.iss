@@ -19,7 +19,7 @@ PrivilegesRequired=admin
 WizardStyle=modern
 
 [Files]
-Source: "publish-definitive\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "publish-definitive\FotoCleaner.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

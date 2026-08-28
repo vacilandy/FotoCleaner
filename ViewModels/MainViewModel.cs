@@ -15,18 +15,21 @@ public sealed class MainViewModel : ObservableObject
     private double threshold = 90;
     private double previewSize = 220;
     private bool busy;
+    private CancellationTokenSource? scanCancellation;
     private readonly MediaScanner scanner = new(new PerceptualHashService(), new HashDatabase());
     private readonly FileRelocationService relocator = new();
     public ObservableCollection<DuplicateGroup> Groups { get; } = [];
     public ObservableCollection<ImageFormatOption> ImageFormats { get; } = [
         new("JPG"), new("JPEG"), new("PNG"), new("WEBP"), new("BMP"),
-        new("GIF"), new("TIFF"), new("HEIC"), new("AVIF"), new("RAW")
+        new("GIF"), new("TIFF"), new("HEIC"), new("AVIF"), new("RAW"),
+        new("CR2"), new("CR3"), new("NEF"), new("ARW"), new("DNG"), new("ORF"), new("RW2"), new("PEF")
     ];
     public string SelectedFolder { get => selectedFolder; set => SetProperty(ref selectedFolder, value); }
     public string StatusText { get => statusText; set => SetProperty(ref statusText, value); }
     public double Threshold { get => threshold; set => SetProperty(ref threshold, value); }
     public double PreviewSize { get => previewSize; set => SetProperty(ref previewSize, value); }
     public bool CanScan => !busy && Directory.Exists(selectedFolder);
+    public bool IsBusy => busy;
     public int DuplicateCount => Groups.Count;
     public RelayCommand SelectFolderCommand { get; }
     public AsyncRelayCommand ScanCommand { get; }
@@ -61,11 +64,11 @@ public sealed class MainViewModel : ObservableObject
     }
     private async Task ScanAsync()
     {
-        busy = true; OnStateChanged(); Groups.Clear(); StatusText = "Preparando análisis...";
+        busy = true; scanCancellation = new CancellationTokenSource(); OnStateChanged(); Groups.Clear(); StatusText = "Preparando análisis...";
         try
         {
             var selectedExtensions = ImageFormats.Where(format => format.IsEnabled).Select(format => $".{format.Extension.ToLowerInvariant()}");
-            var files = await scanner.ScanAsync(SelectedFolder, selectedExtensions, new Progress<string>(s => StatusText = s), CancellationToken.None);
+            var files = await scanner.ScanAsync(SelectedFolder, selectedExtensions, new Progress<string>(s => StatusText = s), scanCancellation.Token);
             var processed = new HashSet<string>();
             foreach (var file in files)
             {
@@ -81,8 +84,9 @@ public sealed class MainViewModel : ObservableObject
             }
             StatusText = $"Análisis terminado · {files.Count} archivos revisados, {Groups.Count} grupos encontrados";
         }
+        catch (OperationCanceledException) { StatusText = "Análisis cancelado"; }
         catch (Exception ex) { StatusText = $"Error: {ex.Message}"; }
-        finally { busy = false; OnStateChanged(); }
+        finally { scanCancellation?.Dispose(); scanCancellation = null; busy = false; OnStateChanged(); }
     }
     private bool Similar(MediaFile left, MediaFile right)
     {
@@ -125,6 +129,7 @@ public sealed class MainViewModel : ObservableObject
     private void OnStateChanged() 
     { 
         OnPropertyChanged(nameof(CanScan)); 
+        OnPropertyChanged(nameof(IsBusy));
         OnPropertyChanged(nameof(DuplicateCount)); 
         ((RelayCommand)SelectFolderCommand).Refresh(); 
         ((AsyncRelayCommand)ScanCommand).RefreshCanExecute(); 

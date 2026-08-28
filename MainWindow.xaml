@@ -6,6 +6,7 @@
         Background="#F8FAFC" FontFamily="Segoe UI">
     <Window.Resources>
         <infra:ImagePreviewConverter x:Key="ImagePreviewConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <SolidColorBrush x:Key="Slate900" Color="#0F172A"/>
         <SolidColorBrush x:Key="Slate700" Color="#334155"/>
         <SolidColorBrush x:Key="Slate500" Color="#64748B"/>

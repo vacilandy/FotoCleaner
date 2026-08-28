@@ -14,7 +14,9 @@ public sealed class FileRelocationService
         {
             token.ThrowIfCancellationRequested();
             var fullSource = Path.GetFullPath(source);
-            if (!fullSource.StartsWith(fullRoot.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) continue;
+            var isInsideRoot = fullSource.Equals(fullRoot, StringComparison.OrdinalIgnoreCase)
+                || fullSource.StartsWith(fullRoot.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+            if (!isInsideRoot || fullSource.StartsWith(destination.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) continue;
             var target = Path.Combine(destination, Path.GetFileName(fullSource));
             var stem = Path.GetFileNameWithoutExtension(target); var extension = Path.GetExtension(target); var suffix = 1;
             while (File.Exists(target)) target = Path.Combine(destination, $"{stem}_{suffix++}{extension}");

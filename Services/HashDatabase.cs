@@ -24,7 +24,7 @@ public sealed class HashDatabase
     public async Task<HashResult?> FindAsync(string path, FileInfo info, CancellationToken token)
     {
         await using var connection = Open(); await using var command = connection.CreateCommand();
-        command.CommandText = "SELECT hash, duration, width, height FROM media_hashes WHERE size=$size AND modified=$modified ORDER BY CASE WHEN path=$path THEN 0 ELSE 1 END LIMIT 1";
+        command.CommandText = "SELECT hash, duration, width, height FROM media_hashes WHERE path=$path AND size=$size AND modified=$modified LIMIT 1";
         command.Parameters.AddWithValue("$path", path); command.Parameters.AddWithValue("$size", info.Length); command.Parameters.AddWithValue("$modified", info.LastWriteTimeUtc.Ticks);
         await using var reader = await command.ExecuteReaderAsync(token);
         if (!await reader.ReadAsync(token)) return null;
