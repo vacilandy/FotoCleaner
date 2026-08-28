@@ -12,9 +12,9 @@ publish-final-v3/
 publish-final-v4/
 publish-definitive/
 publish-definitive-v2/
+bin/
+obj/
+publish-definitive/
 *.user
 *.suo
-FotoCleaner-para-Gemini.zip
-publish-definitive-v5/
-publish-definitive-v6/
 publish-definitive-v7/

@@ -30,3 +30,13 @@ La aplicacion solo analiza la carpeta elegida y sus descendientes, normaliza rut
 - El escaneo usa concurrencia limitada para equilibrar CPU y velocidad del disco.
 - Las listas usan reciclado de filas y las miniaturas se decodifican reducidas para mantener fluido el desplazamiento.
 - Para bibliotecas muy grandes, analiza por subcarpetas y usa miniaturas de 120 a 180 px.
+
+## Crear un instalador
+
+La carpeta `publish-definitive` contiene el ejecutable autocontenido para Windows x64. Para distribuirlo como instalador, una opción sencilla es Inno Setup:
+
+1. Instala Inno Setup desde https://jrsoftware.org/isinfo.php.
+2. Crea un nuevo script y usa como carpeta de archivos la carpeta `publish-definitive`.
+3. Define `FotoCleaner.exe` como aplicación principal y crea el instalador.
+
+El instalador puede incluir un acceso directo en el escritorio y en el menu Inicio. La carpeta de datos de la aplicacion se guarda en `%LOCALAPPDATA%/FotoCleaner` y contiene la cache SQLite.
