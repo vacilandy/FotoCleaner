@@ -1,0 +1,5 @@
+{
+  "profiles": {
+    "FotoCleaner": { "commandName": "Project", "nativeDebugging": true }
+  }
+}
