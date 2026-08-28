@@ -15,11 +15,9 @@ public sealed class MainViewModel : ObservableObject
     private double threshold = 90;
     private double previewSize = 180;
     private bool busy;
-    private DuplicateGroup? selectedGroup;
     private readonly MediaScanner scanner = new(new PerceptualHashService(), new HashDatabase());
     private readonly FileRelocationService relocator = new();
     public ObservableCollection<DuplicateGroup> Groups { get; } = [];
-    public DuplicateGroup? SelectedGroup { get => selectedGroup; set => SetProperty(ref selectedGroup, value); }
     public ObservableCollection<ImageFormatOption> ImageFormats { get; } = [
         new("JPG"), new("JPEG"), new("PNG"), new("WEBP"), new("BMP"),
         new("GIF"), new("TIFF"), new("HEIC"), new("AVIF"), new("RAW")
@@ -63,7 +61,7 @@ public sealed class MainViewModel : ObservableObject
     }
     private async Task ScanAsync()
     {
-        busy = true; OnStateChanged(); Groups.Clear(); SelectedGroup = null; StatusText = "Preparando análisis...";
+        busy = true; OnStateChanged(); Groups.Clear(); StatusText = "Preparando análisis...";
         try
         {
             var selectedExtensions = ImageFormats.Where(format => format.IsEnabled).Select(format => $".{format.Extension.ToLowerInvariant()}");
@@ -79,7 +77,6 @@ public sealed class MainViewModel : ObservableObject
                     group.AddRange(similar.Select(f => new SelectableMediaFile { File = f }));
                     foreach (var f in group) processed.Add(f.FullPath);
                     Groups.Add(new DuplicateGroup { Label = $"Grupo similar · {group.Count} archivos", Items = group });
-                    SelectedGroup ??= Groups[^1];
                 }
             }
             StatusText = $"Análisis terminado · {files.Count} archivos revisados, {Groups.Count} grupos encontrados";
