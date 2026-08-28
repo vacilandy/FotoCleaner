@@ -31,8 +31,10 @@ public sealed class MediaScanner(IHashService hasher, HashDatabase database)
                 progress?.Report($"Procesando {Path.GetFileName(path)} ({completed} de {paths.Length})");
                 var info = new FileInfo(path);
                 var cached = await database.FindAsync(path, info, ct);
-                var hash = cached ?? await hasher.ComputeAsync(path, ct);
-                if (cached is null) pendingCache.Add((path, info, hash));
+                var hash = cached is null || cached.Width == 0 || cached.Height == 0
+                    ? await hasher.ComputeAsync(path, ct)
+                    : cached;
+                if (cached is null || hash != cached) pendingCache.Add((path, info, hash));
                 results.Add(new MediaFile(path, info.Name, info.Length, hash.Duration, hash.Hash, hash.Width, hash.Height));
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException)
